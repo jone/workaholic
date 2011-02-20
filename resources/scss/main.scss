@@ -1,0 +1,30 @@
+// 1. Variable overrides, example:
+$base-color: #080;
+
+// 2. Include Sencha Touch styles
+@import 'sencha-touch/default/all';
+@include sencha-panel;
+@include sencha-buttons;
+@include sencha-sheet;
+@include sencha-picker;
+@include sencha-toolbar-forms;
+@include sencha-tabs;
+@include sencha-toolbar;
+@include sencha-carousel;
+@include sencha-indexbar;
+@include sencha-list;
+@include sencha-layout;
+@include sencha-form;
+@include sencha-loading-spinner;
+
+
+@include pictos-iconmask('power_on');
+@include pictos-iconmask('check2');
+@include pictos-iconmask('chart2');
+
+// 3. Define custom styles (can use SASS/Compass), example:
+// .mybox {
+//     @include border-radius(4px);
+// }
+
+
