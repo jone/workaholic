@@ -1,5 +1,45 @@
 var tabpanel;
 
+Ext.regModel('Clocktime', {
+  fields: [
+    'id',
+    /* timestamp of clocking in */
+    {name: 'clockin',
+     type: 'int'},
+    /* timestamp of clocking out */
+    {name: 'clockout',
+     type: 'int',
+     defaultValue: 0},
+    /* true if clockout is set */
+    {name: 'closed',
+     type: 'boolean',
+     defaultValue: false}
+  ],
+
+  proxy: {
+    type: 'localstorage',
+    id  : 'workaholic-clocktime'
+  }
+
+});
+
+Ext.regModel('settings', {
+  fields: [
+    {name: 'key',
+     type: 'string'},
+
+    {name: 'value',
+     type: 'string'}
+  ],
+
+  proxy: {
+    type: 'localstorage',
+    id  : 'workaholic-settings'
+  }
+});
+
+
+
 Ext.setup({
   icon: 'icon.png',
   // tabletStartupScreen: 'tablet_startup.png',
@@ -13,11 +53,22 @@ Ext.setup({
     var clock_in = function() {
       Ext.getCmp('clock-in-button').disable();
       Ext.getCmp('clock-out-button').enable();
+      Ext.ModelMgr.create({
+        clockin: (new Date()).getTime()
+      }, 'Clocktime').save();
     };
 
     var clock_out = function() {
       Ext.getCmp('clock-in-button').enable();
       Ext.getCmp('clock-out-button').disable();
+
+      var store = new Ext.data.Store({model: 'Clocktime'});
+      store.load();
+      store.filter('closed', false);
+      var rec = store.first();
+      rec.set('clockout', (new Date()).getTime());
+      rec.set('closed', true);
+      rec.save();
     };
 
 
@@ -39,6 +90,7 @@ Ext.setup({
           id: 'clock-in-button',
           componentCls: 'clock-button',
           text: 'Clock in',
+          disabled: true,
           handler: clock_in
         },
 
@@ -50,7 +102,22 @@ Ext.setup({
           disabled: true,
           handler: clock_out
         }
-      ]
+      ],
+
+      listeners: {
+        beforerender: function(panel) {
+          var store = new Ext.data.Store({model: 'Clocktime'});
+          store.load();
+          store.filter('closed', false);
+          if(store.first()) {
+            Ext.getCmp('clock-in-button').disable();
+            Ext.getCmp('clock-out-button').enable();
+          } else {
+            Ext.getCmp('clock-in-button').enable();
+            Ext.getCmp('clock-out-button').disable();
+          }
+        }
+      }
     };
 
 
