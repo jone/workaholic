@@ -213,9 +213,9 @@ Ext.setup({
                main_panel.setActiveItem(tabpanel, 'flip');
              }},
             {xtype: 'spacer'},
+
             {xtype: 'button',
              text: 'Save',
-             id: 'new-task-save-button',
              handler: function(button) {
                var title = Ext.getCmp('new-task-title').getValue();
                var description = Ext.getCmp('new-task-description').getValue();
@@ -351,30 +351,29 @@ Ext.setup({
       return get_setting('working-time', 40);
     };
 
-    var save_settings_handler = function() {
-      set_setting('working-time',
-                  Ext.getCmp('settings-field-working-time').getValue());
-
-      tabpanel.setActiveItem(tabpanel.items.get(0));
-    };
-
     var settings_panel = {
 
       dockedItems: [
         {
           dock : 'top',
           xtype: 'toolbar',
-          title: 'Settings'
-        },
+          title: 'Settings',
+          items: [
+            {xtype: 'spacer'},
 
-        {
-          dock: 'bottom',
-          xtype: 'button',
-          text: 'Save',
-          ui: 'round',
-          handler: save_settings_handler
+            {xtype: 'button',
+             text: 'Save',
+             handler: function() {
+               set_setting(
+                 'working-time',
+                 Ext.getCmp('settings-field-working-time').getValue());
+
+               tabpanel.setActiveItem(tabpanel.items.get(0),
+                                      {type: 'slide', direction: 'right'});
+             }}
+
+          ]
         }
-
       ],
 
       items: [
