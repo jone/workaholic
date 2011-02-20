@@ -72,7 +72,7 @@ Ext.setup({
       rec.save();
     };
 
-    var update_clock_summery = function() {
+    var update_clock_summary = function() {
       var panel = Ext.getCmp('clock-summary');
 
       /* calculate the amount of time worked today */
@@ -113,13 +113,14 @@ Ext.setup({
         return Math.round((milliseconds / 1000 / 60 / 60) * 100) / 100;
       };
 
-      panel.html = '<br />' +
+      panel.update('<br />' +
         '<table>' +
         '<tr><th>Worked today:</th><td>' + ftime(today) + 'h</td></tr>' +
         '<tr><th>Worked this week:</th><td>' + ftime(week) + 'h</td></tr>' +
-        '</table>';
+        '</table>');
     };
-    setTimeout(update_clock_summery, 30000);
+    setInterval(update_clock_summary, 30000);
+
 
     var clock_panel = {
 
@@ -170,7 +171,7 @@ Ext.setup({
             Ext.getCmp('clock-in-button').enable();
             Ext.getCmp('clock-out-button').disable();
           }
-          update_clock_summery();
+          update_clock_summary();
         }
       }
     };
