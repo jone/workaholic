@@ -23,8 +23,9 @@ Ext.regModel('Clocktime', {
 
 });
 
-Ext.regModel('settings', {
+Ext.regModel('Settings', {
   fields: [
+    'id',
     {name: 'key',
      type: 'string'},
 
@@ -170,6 +171,43 @@ Ext.setup({
 
     /* ============== SETTINGS ============ */
 
+    var set_setting = function(key, value) {
+      var store = new Ext.data.Store({model: 'Settings'});
+      store.load();
+      store.filter('key', key);
+      var rec = store.first();
+      if(rec) {
+        rec.set('value', value);
+        rec.save();
+      } else {
+        Ext.ModelMgr.create({key: key, value: value},
+                           'Settings').save();
+      }
+    };
+
+    var get_setting = function(key, defaultValue) {
+      var store = new Ext.data.Store({model: 'Settings'});
+      store.load();
+      store.filter('key', key);
+      var rec = store.first();
+      if(rec) {
+        return rec.get('value');
+      } else {
+        return defaultValue;
+      }
+    };
+
+    var get_working_time = function() {
+      return get_setting('working-time', 40);
+    };
+
+    var save_settings_handler = function() {
+      set_setting('working-time',
+                  Ext.getCmp('settings-field-working-time').getValue());
+
+      tabpanel.setActiveItem(tabpanel.items.get(0));
+    };
+
     var settings_panel = {
 
       dockedItems: [
@@ -177,7 +215,16 @@ Ext.setup({
           dock : 'top',
           xtype: 'toolbar',
           title: 'Settings'
+        },
+
+        {
+          dock: 'bottom',
+          xtype: 'button',
+          text: 'Save',
+          ui: 'round',
+          handler: save_settings_handler
         }
+
       ],
 
       items: [
@@ -203,8 +250,7 @@ Ext.setup({
                   xtype: 'numberfield',
                   name: 'working_time',
                   label: 'Working Time',
-                  id: 'settings-field-working-time',
-                  value: 40
+                  id: 'settings-field-working-time'
                 }
               ]
             }
@@ -212,7 +258,13 @@ Ext.setup({
           ]
         }
 
-      ]
+      ],
+
+      listeners: {
+        beforerender: function(panel) {
+          Ext.getCmp('settings-field-working-time').value = get_working_time();
+        }
+      }
     };
 
 
@@ -244,6 +296,7 @@ Ext.setup({
           title: 'Clock',
           iconCls: 'power_on',
           cls: 'card_clock',
+          id: 'card_clock',
           items: [clock_panel]
         },
 
@@ -269,5 +322,6 @@ Ext.setup({
         }
       ]
     });
+
   }
 });
