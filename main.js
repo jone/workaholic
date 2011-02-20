@@ -56,6 +56,92 @@ Ext.setup({
 
 
 
+    /* ============== TASKS ============ */
+
+    var tasks_panel = new Ext.Panel({
+      fullscreen: true,
+
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Tasks'
+        }
+      ],
+
+      items: [
+        {
+          xtype: 'panel',
+          html: '<p><br /><center>Not yet implemented</center></p>'
+        }
+      ]
+
+    });
+
+
+
+    /* ============== STATISTICS ============ */
+
+    var stats_panel = new Ext.Panel({
+      fullscreen: true,
+
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Statistics'
+        }
+      ],
+
+      items: [
+        {
+          xtype: 'panel',
+          html: '<p><br /><center>Not yet implemented</center></p>'
+        }
+      ]
+
+    });
+
+
+
+    /* ============== SETTINGS ============ */
+
+    var settings_panel = new Ext.Panel({
+      fullscreen: true,
+
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Settings'
+        }
+      ],
+
+      items: [
+        {
+          xtype: 'fieldset',
+          title: 'Clock settings',
+          defaults: {
+            // labelAlign: 'right'
+            // labelWidth: '35%'
+          },
+
+          items: [
+            {
+              xtype: 'numberfield',
+              name: 'name',
+              label: 'Name',
+              value: 40
+            }
+          ]
+
+        }
+      ]
+
+    });
+
+
+
 
     /* ============== MAIN PANEL ============ */
     tabpanel = new Ext.TabPanel({
@@ -70,7 +156,7 @@ Ext.setup({
 
       ui: 'light',
       cardSwitchAnimation: {
-        type: 'slide',
+        type: 'flip',
         cover: true
       },
 
@@ -88,23 +174,23 @@ Ext.setup({
 
         {
           title: 'Tasks',
-          html: '<h1>Favorites Card</h1>',
           iconCls: 'check2',
-          cls: 'card_tasks'
+          cls: 'card_tasks',
+          items: [tasks_panel]
         },
 
         {
           title: 'Staistics',
-          html: '<h1>Downloads Card</h1>',
           iconCls: 'chart2',
-          cls: 'card_stats'
+          cls: 'card_stats',
+          items: [stats_panel]
         },
 
         {
           title: 'Settings',
-          html: '<h1>Settings Card</h1>',
           iconCls: 'settings',
-          cls: 'card_settings'
+          cls: 'card_settings',
+          items: [settings_panel]
         }]
     });
   }
