@@ -39,6 +39,23 @@ Ext.regModel('Settings', {
   }
 });
 
+Ext.regModel('Tasks', {
+  fields: [
+    'id',
+
+    {name: 'title',
+     type: 'string'},
+
+    {name: 'description',
+     type: 'string'}
+  ],
+
+  proxy: {
+    type: 'localstorage',
+    id: 'workaholic-tasks'
+  }
+});
+
 
 
 Ext.setup({
@@ -201,10 +218,20 @@ Ext.setup({
              id: 'new-task-save-button',
              handler: function(button) {
                var title = Ext.getCmp('new-task-title').getValue();
+               var description = Ext.getCmp('new-task-description').getValue();
                if(title.length===0) {
                  alert('Please enter a title.');
                  return;
                }
+
+               Ext.ModelMgr.create({
+                 title: title,
+                 description: description
+               }, 'Tasks').save();
+
+               Ext.getCmp('new-task-title').setValue('');
+               Ext.getCmp('new-task-description').setValue('');
+               main_panel.setActiveItem(tabpanel, 'flip');
              }}
           ]
         }
@@ -227,7 +254,12 @@ Ext.setup({
                name: 'new-task-title',
                id: 'new-task-title',
                label: 'Title'
-              }
+              },
+
+              {xtype: 'textareafield',
+               name: 'new-task-description',
+               id: 'new-task-description',
+               label: 'Description'}
 
             ]}
 
@@ -401,8 +433,7 @@ Ext.setup({
 
       ui: 'light',
       cardSwitchAnimation: {
-        type: 'flip',
-        cover: true
+        type: 'slide'
       },
 
       defaults: {
