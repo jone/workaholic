@@ -17,14 +17,17 @@ $base-color: #080;
 @include sencha-form;
 @include sencha-loading-spinner;
 
-
 @include pictos-iconmask('power_on');
 @include pictos-iconmask('check2');
 @include pictos-iconmask('chart2');
 
 // 3. Define custom styles (can use SASS/Compass), example:
 // .mybox {
-//     @include border-radius(4px);
+  //     @include border-radius(4px);
 // }
 
-
+.clock-button {
+  font-size: 150%;
+  width: 80%;
+  margin-top: 1em;
+}

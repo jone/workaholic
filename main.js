@@ -1,3 +1,5 @@
+var tabpanel;
+
 Ext.setup({
   icon: 'icon.png',
   // tabletStartupScreen: 'tablet_startup.png',
@@ -6,7 +8,57 @@ Ext.setup({
 
   onReady: function() {
 
-    var tabpanel = new Ext.TabPanel({
+    /* ============== CLOCKING ============ */
+
+    var clock_in = function() {
+      Ext.getCmp('clock-in-button').disable();
+      Ext.getCmp('clock-out-button').enable();
+    };
+
+    var clock_out = function() {
+      Ext.getCmp('clock-in-button').enable();
+      Ext.getCmp('clock-out-button').disable();
+    };
+
+
+    var clock_panel = new Ext.Panel({
+      fullscreen: true,
+
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Workaholic'
+        }
+      ],
+
+      layout: 'vbox',
+
+      items: [
+        {
+          xtype: 'button',
+          id: 'clock-in-button',
+          componentCls: 'clock-button',
+          text: 'Clock in',
+          handler: clock_in
+        },
+
+        {
+          xtype: 'button',
+          id: 'clock-out-button',
+          componentCls: 'clock-button',
+          text: 'Clock out',
+          disabled: true,
+          handler: clock_out
+        }
+      ]
+    });
+
+
+
+
+    /* ============== MAIN PANEL ============ */
+    tabpanel = new Ext.TabPanel({
       tabBar: {
         dock: 'bottom',
         layout: {
@@ -29,17 +81,16 @@ Ext.setup({
       items: [
         {
           title: 'Clock',
-          html: 'hello world',
           iconCls: 'power_on',
-          cls: 'card_clock'
+          cls: 'card_clock',
+          items: [clock_panel]
         },
 
         {
           title: 'Tasks',
           html: '<h1>Favorites Card</h1>',
           iconCls: 'check2',
-          cls: 'card_tasks'// ,
-          // badgeText: '1'
+          cls: 'card_tasks'
         },
 
         {
