@@ -31,3 +31,11 @@ $base-color: #080;
   width: 80%;
   margin-top: 1em;
 }
+
+#clock-summary table {
+
+  th {
+    font-weight: bold;
+    padding-right: .5em;
+  }
+}

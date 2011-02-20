@@ -72,6 +72,54 @@ Ext.setup({
       rec.save();
     };
 
+    var update_clock_summery = function() {
+      var panel = Ext.getCmp('clock-summary');
+
+      /* calculate the amount of time worked today */
+      var store = new Ext.data.Store({model: 'Clocktime'});
+      store.load();
+
+      var start_today = new Date();
+      start_today.setHours(0);
+      start_today.setMinutes(0);
+      start_today.setSeconds(0);
+
+      var start_week = new Date();
+      start_week.setHours(0);
+      start_week.setMinutes(0);
+      start_week.setSeconds(0);
+      // set date to the day where "day" is 0 (=sunday)
+      start_week.setTime(start_week.getTime() - (start_week.getDay() *
+                                                 60 * 60 * 24 * 1000));
+
+      var today = 0;
+      var week = 0;
+      store.each(function(record) {
+        var clockin = record.get('clockin');
+        var clockout = record.get('clockout');
+        if(!clockout) {
+          clockout = (new Date()).getTime();
+        }
+        if(clockin > start_today) {
+          today += (clockout - clockin);
+        }
+        if(clockin > start_week) {
+          week += (clockout - clockin);
+        }
+      });
+
+      var ftime = function(milliseconds) {
+        /* returns amount of hours */
+        return Math.round((milliseconds / 1000 / 60 / 60) * 100) / 100;
+      };
+
+      panel.html = '<br />' +
+        '<table>' +
+        '<tr><th>Worked today:</th><td>' + ftime(today) + 'h</td></tr>' +
+        '<tr><th>Worked this week:</th><td>' + ftime(week) + 'h</td></tr>' +
+        '</table>';
+    };
+    setTimeout(update_clock_summery, 30000);
 
     var clock_panel = {
 
@@ -102,6 +150,11 @@ Ext.setup({
           text: 'Clock out',
           disabled: true,
           handler: clock_out
+        },
+
+        {
+          xtype: 'panel',
+          id: 'clock-summary'
         }
       ],
 
@@ -117,6 +170,7 @@ Ext.setup({
             Ext.getCmp('clock-in-button').enable();
             Ext.getCmp('clock-out-button').disable();
           }
+          update_clock_summery();
         }
       }
     };
