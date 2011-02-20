@@ -402,7 +402,33 @@ Ext.setup({
                   id: 'settings-field-working-time'
                 }
               ]
-            }
+            },
+
+            {xtype: 'button',
+             ui: 'decline',
+             text: 'Reset Application',
+             handler: function(button) {
+               if (!this.actions) {
+                 this.actions = new Ext.ActionSheet({
+                   items: [{
+                     text: 'Delete everything!',
+                     ui: 'decline',
+                     scope: this,
+                     handler: function(button) {
+                       window.localStorage.clear();
+                       this.actions.hide();
+                     }
+                   },{
+                     text: 'Cancel',
+                     scope: this,
+                     handler: function(button) {
+                       this.actions.hide();
+                     }
+                   }]
+                 });
+               }
+               this.actions.show();
+             }}
 
           ]
         }
