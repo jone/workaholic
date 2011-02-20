@@ -49,6 +49,7 @@ Ext.setup({
 
   onReady: function() {
 
+
     /* ============== CLOCKING ============ */
 
     var clock_in = function() {
@@ -114,10 +115,10 @@ Ext.setup({
       };
 
       panel.update('<br />' +
-        '<table>' +
-        '<tr><th>Worked today:</th><td>' + ftime(today) + 'h</td></tr>' +
-        '<tr><th>Worked this week:</th><td>' + ftime(week) + 'h</td></tr>' +
-        '</table>');
+                   '<table>' +
+                   '<tr><th>Worked today:</th><td>' + ftime(today) + 'h</td></tr>' +
+                   '<tr><th>Worked this week:</th><td>' + ftime(week) + 'h</td></tr>' +
+                   '</table>');
     };
     setInterval(update_clock_summary, 30000);
 
@@ -180,13 +181,75 @@ Ext.setup({
 
     /* ============== TASKS ============ */
 
+    var new_task_panel = new Ext.Panel({
+
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Add Task',
+          items: [
+            {xtype: 'button',
+             ui: 'back',
+             text: 'Cancel',
+             handler: function() {
+               main_panel.setActiveItem(tabpanel, 'flip');
+             }},
+            {xtype: 'spacer'},
+            {xtype: 'button',
+             text: 'Save',
+             id: 'new-task-save-button',
+             handler: function(button) {
+               var title = Ext.getCmp('new-task-title').getValue();
+               if(title.length===0) {
+                 alert('Please enter a title.');
+                 return;
+               }
+             }}
+          ]
+        }
+      ],
+
+      items: [
+        {xtype: 'form',
+         id: 'taskform',
+         scroll: 'vertical',
+
+         items: [
+           {xtype: 'fieldset',
+            title: 'Task data',
+            defaults: {
+              labelWidth: '35%'
+            },
+
+            items: [
+              {xtype: 'textfield',
+               name: 'new-task-title',
+               id: 'new-task-title',
+               label: 'Title'
+              }
+
+            ]}
+
+         ]}
+      ]
+    });
+
     var tasks_panel = {
 
       dockedItems: [
         {
           dock : 'top',
           xtype: 'toolbar',
-          title: 'Tasks'
+          title: 'Tasks',
+          items: [
+            {xtype: 'spacer'},
+            {xtype: 'button',
+             text: 'New',
+             handler: function() {
+               main_panel.setActiveItem(new_task_panel, 'flip');
+             }}
+          ]
         }
       ],
 
@@ -236,7 +299,7 @@ Ext.setup({
         rec.save();
       } else {
         Ext.ModelMgr.create({key: key, value: value},
-                           'Settings').save();
+                            'Settings').save();
       }
     };
 
@@ -334,7 +397,7 @@ Ext.setup({
         }
       },
 
-      fullscreen: true,
+      layout: 'card',
 
       ui: 'light',
       cardSwitchAnimation: {
@@ -349,7 +412,7 @@ Ext.setup({
       items: [
         {
           title: 'Clock',
-          iconCls: 'power_on',
+          iconCls: 'time',
           cls: 'card_clock',
           id: 'card_clock',
           items: [clock_panel]
@@ -376,6 +439,14 @@ Ext.setup({
           items: [settings_panel]
         }
       ]
+    });
+
+
+    /* use card layout model */
+    var main_panel = new Ext.Panel({
+      fullscreen: true,
+      layout: 'card',
+      items: [tabpanel]
     });
 
   }
