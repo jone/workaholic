@@ -21,8 +21,7 @@ Ext.setup({
     };
 
 
-    var clock_panel = new Ext.Panel({
-      fullscreen: true,
+    var clock_panel = {
 
       dockedItems: [
         {
@@ -52,14 +51,13 @@ Ext.setup({
           handler: clock_out
         }
       ]
-    });
+    };
 
 
 
     /* ============== TASKS ============ */
 
-    var tasks_panel = new Ext.Panel({
-      fullscreen: true,
+    var tasks_panel = {
 
       dockedItems: [
         {
@@ -76,14 +74,13 @@ Ext.setup({
         }
       ]
 
-    });
+    };
 
 
 
     /* ============== STATISTICS ============ */
 
-    var stats_panel = new Ext.Panel({
-      fullscreen: true,
+    var stats_panel = {
 
       dockedItems: [
         {
@@ -100,14 +97,13 @@ Ext.setup({
         }
       ]
 
-    });
+    };
 
 
 
     /* ============== SETTINGS ============ */
 
-    var settings_panel = new Ext.Panel({
-      fullscreen: true,
+    var settings_panel = {
 
       dockedItems: [
         {
@@ -119,26 +115,38 @@ Ext.setup({
 
       items: [
         {
-          xtype: 'fieldset',
-          title: 'Clock settings',
-          defaults: {
-            // labelAlign: 'right'
-            // labelWidth: '35%'
-          },
-
+          title: 'Basic',
+          xtype: 'form',
+          id: 'basicform',
+          scroll: 'vertical',
           items: [
+
             {
-              xtype: 'numberfield',
-              name: 'name',
-              label: 'Name',
-              value: 40
+              xtype: 'fieldset',
+              title: 'Clock settings',
+              instructions: 'Enter the amount of hours you should work '+
+                'per week',
+              defaults: {
+                // labelAlign: 'right'
+                labelWidth: '35%'
+              },
+
+              items: [
+                {
+                  xtype: 'numberfield',
+                  name: 'working_time',
+                  label: 'Working Time',
+                  id: 'settings-field-working-time',
+                  value: 40
+                }
+              ]
             }
+
           ]
-
         }
-      ]
 
-    });
+      ]
+    };
 
 
 
@@ -191,7 +199,8 @@ Ext.setup({
           iconCls: 'settings',
           cls: 'card_settings',
           items: [settings_panel]
-        }]
+        }
+      ]
     });
   }
 });
