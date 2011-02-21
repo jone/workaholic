@@ -69,6 +69,15 @@ Ext.setup({
 
   onReady: function() {
 
+    var get_tasks_store = function() {
+      /* returns a SINGLETON tasks store */
+      if(typeof get_tasks_store._store == 'undefined') {
+        get_tasks_store._store = new Ext.data.Store(
+          {model: 'Tasks', sorters: 'title'});
+        get_tasks_store._store.load();
+      }
+      return get_tasks_store._store;
+    };
 
     /* ============== CLOCKING ============ */
 
@@ -245,6 +254,9 @@ Ext.setup({
                Ext.getCmp('new-task-title').setValue('');
                Ext.getCmp('new-task-description').setValue('');
                main_panel.setActiveItem(tabpanel, 'flip');
+
+               // update store
+               get_tasks_store().load();
              }}
           ]
         }
@@ -301,8 +313,7 @@ Ext.setup({
         {
           layout: 'fit',
           xtype: 'list',
-          store: new Ext.data.Store({model: 'Tasks',
-                                     sorters: 'title'}).load(),
+          store: get_tasks_store(),
           itemTpl: '{title}',
           onItemDisclosure: function(record, btn, index) {
             task_details_panel.record = record;
