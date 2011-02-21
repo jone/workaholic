@@ -1,4 +1,5 @@
 var tabpanel;
+var debug;
 
 
 /* ===== DATABASE ====== */
@@ -220,7 +221,7 @@ Ext.setup({
 
     /* ============== TASKS ============ */
 
-    var new_task_panel = new Ext.Panel({
+    var task_details_panel = new Ext.Panel({
 
       dockedItems: [
         {
@@ -238,25 +239,32 @@ Ext.setup({
 
             {xtype: 'button',
              text: 'Save',
+
              handler: function(button) {
-               var title = Ext.getCmp('new-task-title').getValue();
-               var description = Ext.getCmp('new-task-description').getValue();
-               if(title.length===0) {
+               var form = Ext.getCmp('task_details_panel-task_form');
+               var values = form.getValues();
+
+               if(values.title.length===0) {
                  alert('Please enter a title.');
                  return;
                }
 
-               Ext.ModelMgr.create({
-                 title: title,
-                 description: description
-               }, 'Tasks').save();
+               if(task_details_panel._record !== null) {
+                 /* edit mode */
+                 var record = form.getRecord();
+                 form.updateRecord(record);
+                 record.save();
 
-               Ext.getCmp('new-task-title').setValue('');
-               Ext.getCmp('new-task-description').setValue('');
-               main_panel.setActiveItem(tabpanel, 'flip');
+               } else {
+                 /* create mode */
+                 Ext.ModelMgr.create(values, 'Tasks').save();
+               }
 
-               // update store
+               /* reload the tasks store */
                get_tasks_store().load();
+
+               /* close dialog */
+               main_panel.setActiveItem(tabpanel, 'flip');
              }}
           ]
         }
@@ -264,7 +272,7 @@ Ext.setup({
 
       items: [
         {xtype: 'form',
-         id: 'taskform',
+         id: 'task_details_panel-task_form',
          scroll: 'vertical',
 
          items: [
@@ -276,20 +284,35 @@ Ext.setup({
 
             items: [
               {xtype: 'textfield',
-               name: 'new-task-title',
-               id: 'new-task-title',
+               name: 'title',
                label: 'Title'
               },
 
               {xtype: 'textareafield',
-               name: 'new-task-description',
-               id: 'new-task-description',
+               name: 'description',
                label: 'Description'}
 
             ]}
 
          ]}
-      ]
+      ],
+
+      listeners: {
+        beforeactivate: function(button) {
+          var form = Ext.getCmp('task_details_panel-task_form');
+          form.record = null;
+          /* reset fields */
+          form.getFieldsAsArray().forEach(function(field) {
+            field.setValue('');
+          });
+          form.reset();
+
+          if(task_details_panel._record !== null) {
+            debug = {form: form, record: task_details_panel._record};
+            form.loadRecord(task_details_panel._record);
+          }
+        }
+      }
     });
 
     var tasks_panel = new Ext.Panel({
@@ -303,7 +326,8 @@ Ext.setup({
             {xtype: 'button',
              text: 'New',
              handler: function() {
-               main_panel.setActiveItem(new_task_panel, 'flip');
+               task_details_panel._record = null;
+               main_panel.setActiveItem(task_details_panel, 'flip');
              }}
           ]
         }
@@ -316,47 +340,12 @@ Ext.setup({
           store: get_tasks_store(),
           itemTpl: '{title}',
           onItemDisclosure: function(record, btn, index) {
-            task_details_panel.record = record;
-            Ext.getCmp('task-details-data-panel').update(
-              '<h1 class="task-details-title">' + record.get('title') +
-                '</h1>' +
-                '<p class="task-details-description">' +
-                record.get('description') + '</p>');
-            tasks_panel.setActiveItem(task_details_panel, 'slide');
+            task_details_panel._record = record;
+            main_panel.setActiveItem(task_details_panel, 'flip');
           }
         }
       ]
 
-    });
-
-    var task_details_panel = new Ext.Panel({
-      dockedItems: [
-        {dock: 'top',
-         xtype: 'toolbar',
-         title: 'Task details',
-         items: [
-           {xtype: 'button',
-            ui: 'back',
-            text: 'back',
-            handler: function() {
-              tasks_panel.setActiveItem(tasks_panel.items.get(0),
-                                        {type: 'slide', direction: 'right'});
-            }}
-         ]
-        }
-      ],
-
-      items: [
-        {xtype: 'panel',
-         'id': 'task-details-data-panel'},
-
-        {xtype: 'button',
-         text: 'Edit'},
-
-        {xtype: 'button',
-         ui: 'decline',
-         text: 'Delete'}
-      ]
     });
 
 
