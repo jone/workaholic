@@ -39,3 +39,8 @@ unzip sencha-touch-1.0.1a.zip
 mv sencha-touch-1.0.1a sencha-touch
 rm sencha-touch-1.0.1a.zip}
 end
+
+desc "build css"
+task :build do
+  system %Q{compass compile resources/scss}
+end
