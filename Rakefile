@@ -26,3 +26,16 @@ desc "compass: watch scss changes and compile to css"
 task :watch do
   system %Q{compass watch resources/scss}
 end
+
+desc "download sencha touch and install it"
+task :install do
+  if File.directory? 'sencha-touch'
+    puts "FAILED: sencha-touch directory already exists"
+    exit
+  end
+  system %Q{
+wget http://downloads.sencha.com/touch/sencha-touch-1.0.1a.zip
+unzip sencha-touch-1.0.1a.zip
+mv sencha-touch-1.0.1a sencha-touch
+rm sencha-touch-1.0.1a.zip}
+end
