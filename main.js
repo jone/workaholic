@@ -281,46 +281,42 @@ Ext.setup({
     });
 
     var tasks_panel = new Ext.Panel({
-      fullscreen: true,
-      layout: 'card',
+      dockedItems: [
+        {
+          dock : 'top',
+          xtype: 'toolbar',
+          title: 'Tasks',
+          items: [
+            {xtype: 'spacer'},
+            {xtype: 'button',
+             text: 'New',
+             handler: function() {
+               main_panel.setActiveItem(new_task_panel, 'flip');
+             }}
+          ]
+        }
+      ],
 
-      items: [{
-        dockedItems: [
-          {
-            dock : 'top',
-            xtype: 'toolbar',
-            title: 'Tasks',
-            items: [
-              {xtype: 'spacer'},
-              {xtype: 'button',
-               text: 'New',
-               handler: function() {
-                 main_panel.setActiveItem(new_task_panel, 'flip');
-               }}
-            ]
+      items: [
+        {
+          layout: 'fit',
+          xtype: 'list',
+          store: new Ext.data.Store({model: 'Tasks',
+                                     sorters: 'title'}).load(),
+          itemTpl: '{title}',
+          onItemDisclosure: function(record, btn, index) {
+            task_details_panel.record = record;
+            Ext.getCmp('task-details-data-panel').update(
+              '<h1 class="task-details-title">' + record.get('title') +
+                '</h1>' +
+                '<p class="task-details-description">' +
+                record.get('description') + '</p>');
+            tasks_panel.setActiveItem(task_details_panel, 'slide');
           }
-        ],
+        }
+      ]
 
-        items: [
-          {
-            layout: 'fit',
-            xtype: 'list',
-            store: new Ext.data.Store({model: 'Tasks',
-                                       sorters: 'title'}).load(),
-            itemTpl: '{title}',
-            onItemDisclosure: function(record, btn, index) {
-              task_details_panel.record = record;
-              Ext.getCmp('task-details-data-panel').update(
-                '<h1 class="task-details-title">' + record.get('title') +
-                  '</h1>' +
-                  '<p class="task-details-description">' +
-                  record.get('description') + '</p>');
-              tasks_panel.setActiveItem(task_details_panel, 'slide');
-            }
-          }
-        ]
-
-      }]});
+    });
 
     var task_details_panel = new Ext.Panel({
       dockedItems: [
