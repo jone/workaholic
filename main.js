@@ -448,8 +448,7 @@ Ext.setup({
               instructions: 'Enter the amount of hours you should work '+
                 'per week',
               defaults: {
-                // labelAlign: 'right'
-                labelWidth: '35%'
+                labelWidth: '50%'
               },
 
               items: [
