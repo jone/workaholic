@@ -293,7 +293,44 @@ Ext.setup({
                name: 'description',
                label: 'Description'}
 
-            ]}
+            ]},
+
+           {xtype: 'button',
+            ui: 'decline',
+            text: 'Delete Task',
+
+            handler: function(){
+              if(!this.actions) {
+                this.actions = new Ext.ActionSheet({
+                  items: [
+
+                    {text: 'Delete',
+                     ui: 'decline',
+                     scope: this,
+                     handler: function(button) {
+                       /* remove record */
+                       var form = Ext.getCmp('task_details_panel-task_form');
+                       var store = get_tasks_store();
+                       store.remove(form.getRecord());
+                       store.sync();
+
+                       /* close dialog */
+                       main_panel.setActiveItem(tabpanel, 'flip');
+                       this.actions.hide();
+                     }},
+
+                    {text: 'Cancel',
+                    scope: this,
+                    handler: function(button) {
+                      this.actions.hide();
+                    }}
+
+                  ]
+                });
+              }
+              this.actions.show();
+
+            }}
 
          ]}
       ],
