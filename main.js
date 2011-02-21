@@ -1,5 +1,8 @@
 var tabpanel;
 
+
+/* ===== DATABASE ====== */
+
 Ext.regModel('Clocktime', {
   fields: [
     'id',
@@ -146,7 +149,17 @@ Ext.setup({
         {
           dock : 'top',
           xtype: 'toolbar',
-          title: 'Workaholic'
+          title: 'Workaholic',
+
+          items: [
+            {xtype: 'spacer'},
+
+            {xtype: 'button',
+             text: 'Reload',
+             handler: function() {
+               window.location.reload();
+             }}
+          ]
         }
       ],
 
