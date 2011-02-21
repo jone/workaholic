@@ -228,6 +228,7 @@ Ext.setup({
           dock : 'top',
           xtype: 'toolbar',
           title: 'Add Task',
+
           items: [
             {xtype: 'button',
              ui: 'back',
@@ -315,7 +316,9 @@ Ext.setup({
       }
     });
 
-    var tasks_panel = new Ext.Panel({
+    var tasks_panel = {
+      xtype: 'panel',
+
       dockedItems: [
         {
           dock : 'top',
@@ -337,6 +340,9 @@ Ext.setup({
         {
           layout: 'fit',
           xtype: 'list',
+          singleSelect: true,
+          emptyText: 'No tasks created yet.',
+
           store: get_tasks_store(),
           itemTpl: '{title}',
           onItemDisclosure: function(record, btn, index) {
@@ -346,7 +352,7 @@ Ext.setup({
         }
       ]
 
-    });
+    };
 
 
 
