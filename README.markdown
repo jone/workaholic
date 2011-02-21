@@ -18,7 +18,7 @@ based on [sencha touch](http://www.sencha.com/products/touch/).
 
 **Demo:**
 
-* *comming soon*
+* [workaholic.jone.ch](http://workaholic.jone.ch/)
 
 **Dependencies:**
 
