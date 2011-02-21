@@ -1,7 +1,8 @@
 CACHE MANIFEST
-#rev2
+#rev3
 index.html
 icon.png
 main.js
+favicon.ico
 resources/css/main.css
-../sencha/sencha-touch-debug.js
+sencha-touch.js
