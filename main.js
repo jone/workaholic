@@ -60,6 +60,37 @@ Ext.regModel('Tasks', {
   }
 });
 
+Ext.regModel(
+  'TaskInvestment', {
+    fields: [
+      'id',
+
+      {name: 'task_id',
+       type: 'int'},
+
+      {name: 'starttime',
+       type: 'int'},
+
+      {name: 'endtime',
+       type: 'int',
+       defaultValue: 0},
+
+      {name: 'comment',
+       type: 'string'}
+    ],
+
+    associations: {
+      type: 'belongsTo',
+      model: 'Tasks',
+      primaryKey: 'id',
+      foreignKey: 'task_id'
+    },
+
+    proxy: {
+      type: 'localstorage',
+      id: 'workaholic-task-investement'
+    }
+  });
 
 
 Ext.setup({
@@ -78,6 +109,16 @@ Ext.setup({
         get_tasks_store._store.load();
       }
       return get_tasks_store._store;
+    };
+
+    var get_task_investment_store = function() {
+      /* returns a SINGLETON tasks store */
+      if(typeof get_task_investment_store._store == 'undefined') {
+        get_task_investment_store._store = new Ext.data.Store(
+          {model: 'TaskInvestment', sorters: 'startime'});
+        get_task_investment_store._store.load();
+      }
+      return get_task_investment_store._store;
     };
 
     /* ============== CLOCKING ============ */
@@ -221,6 +262,14 @@ Ext.setup({
 
     /* ============== TASKS ============ */
 
+    var task_update_stop_button = function() {
+      if(get_task_investment_store().find('endtime', 0) === -1) {
+        Ext.getCmp('tasks_panel-stop_button').hide();
+      } else {
+        Ext.getCmp('tasks_panel-stop_button').show();
+      }
+    };
+
     var task_details_panel = new Ext.Panel({
 
       dockedItems: [
@@ -321,10 +370,10 @@ Ext.setup({
                      }},
 
                     {text: 'Cancel',
-                    scope: this,
-                    handler: function(button) {
-                      this.actions.hide();
-                    }}
+                     scope: this,
+                     handler: function(button) {
+                       this.actions.hide();
+                     }}
 
                   ]
                 });
@@ -368,7 +417,24 @@ Ext.setup({
           xtype: 'toolbar',
           title: 'Tasks',
           items: [
+            {xtype: 'button',
+             ui: 'decline',
+             text: 'Stop',
+             id: 'tasks_panel-stop_button',
+
+             handler: function(button) {
+               var store = get_task_investment_store();
+               /* stop current task investment */
+               var record = store.findRecord('endtime', 0);
+               record.set('endtime', (new Date()).getTime());
+               record.save();
+
+               store.load();
+               task_update_stop_button();
+             }},
+
             {xtype: 'spacer'},
+
             {xtype: 'button',
              text: 'New',
              handler: function() {
@@ -388,12 +454,119 @@ Ext.setup({
 
           store: get_tasks_store(),
           itemTpl: '{title}',
-          onItemDisclosure: function(record, btn, index) {
-            task_details_panel._record = record;
-            main_panel.setActiveItem(task_details_panel, 'flip');
+          disableSelection: true,
+
+          // onItemDisclosure: function(record, node, index, event) {
+          // },
+
+          listeners: {
+
+            itemswipe: function(list, index, node, event) {
+              task_details_panel._record = list.getRecord(node);
+              main_panel.setActiveItem(task_details_panel, 'flip');
+            },
+
+            itemtap: function(list, index, node, event) {
+              if(event.target.getAttribute(
+                'class').indexOf('disclosure') > -1) {
+                /* prevent disclosure capture */
+                return;
+              }
+
+              this.task_record = list.getRecord(node);
+
+              if(get_task_investment_store().find('endtime', 0) === -1) {
+                /* currently not working on any task */
+                if(!this.not_working_actions) {
+                  this.not_working_actions = new Ext.ActionSheet({items: [
+
+                    {text: 'Start working on this task',
+                     ui: 'confirm',
+                     scope: this,
+
+                     handler: function(button){
+                       Ext.ModelMgr.create({
+                         starttime: (new Date()).getTime(),
+                         task_id: this.task_record.getId()
+                       }, 'TaskInvestment').save();
+                       get_task_investment_store().load();
+                       this.not_working_actions.hide();
+                       task_update_stop_button();
+                     }},
+
+                    {text: 'Cancel',
+                     scope: this,
+                     handler: function(button){
+                       this.not_working_actions.hide();
+                     }}
+
+                  ]});
+                }
+                this.not_working_actions.show();
+              }
+
+              else {
+                /* currently work on a task */
+                if(!this.working_actions) {
+                  this.working_actions = new Ext.ActionSheet({items: [
+
+                    {text: 'Stop and start on this task ',
+                     ui: 'confirm',
+                     scope: this,
+                     handler: function(button) {
+                       var store = get_task_investment_store();
+                       /* stop current task investment */
+                       var record = store.findRecord('endtime', 0);
+                       record.set('endtime', (new Date()).getTime());
+                       record.save();
+
+                       /* start new task investment */
+                       Ext.ModelMgr.create({
+                         starttime: (new Date()).getTime(),
+                         task_id: this.task_record.getId()
+                       }, 'TaskInvestment').save();
+
+                       store.load();
+                       task_update_stop_button();
+                       this.working_actions.hide();
+                     }},
+
+                    {text: 'Switch task backdated',
+                     ui: 'decline',
+                     scope: this,
+                     handler: function(button) {
+                       var store = get_task_investment_store();
+                       /* swich task of already running investment */
+                       var record = store.findRecord('endtime', 0);
+                       record.set('task_id', this.task_record.getId());
+                       record.save();
+
+                       store.load();
+                       task_update_stop_button();
+                       this.working_actions.hide();
+                     }},
+
+                    {text: 'Cancel',
+                     scope: this,
+                     handler: function(button) {
+                       this.working_actions.hide();
+                     }}
+
+                  ]});
+                }
+                this.working_actions.show();
+              }
+            }
+
           }
         }
-      ]
+      ],
+
+      listeners: {
+        beforerender: function(panel) {
+          task_update_stop_button();
+        }
+      }
 
     };
 
