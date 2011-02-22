@@ -1,5 +1,4 @@
 var tabpanel;
-var debug;
 
 
 /* ===== DATABASE ====== */
@@ -101,6 +100,16 @@ Ext.setup({
 
   onReady: function() {
 
+    var get_clocktime_store = function() {
+      /* returns a SINGLETON clocktime store */
+      if(typeof get_clocktime_store._store == 'undefined') {
+        get_clocktime_store._store = new Ext.data.Store(
+          {model: 'Clocktime', sorters: 'starttime'});
+        get_clocktime_store._store.load();
+      }
+      return get_clocktime_store._store;
+    };
+
     var get_tasks_store = function() {
       /* returns a SINGLETON tasks store */
       if(typeof get_tasks_store._store == 'undefined') {
@@ -112,7 +121,7 @@ Ext.setup({
     };
 
     var get_task_investment_store = function() {
-      /* returns a SINGLETON tasks store */
+      /* returns a SINGLETON task investment store */
       if(typeof get_task_investment_store._store == 'undefined') {
         get_task_investment_store._store = new Ext.data.Store(
           {model: 'TaskInvestment', sorters: 'startime'});
@@ -193,8 +202,83 @@ Ext.setup({
     };
     setInterval(update_clock_summary, 30000);
 
+    var clock_listing_panel = new Ext.Panel({
+      dockedItems: [
+        {xtype: 'toolbar',
+         dock: 'top',
 
-    var clock_panel = {
+         items: [
+
+           {xtype: 'button',
+            ui: 'back',
+            text: 'Back',
+
+            handler: function() {
+              main_panel.setActiveItem(tabpanel, 'flip');
+            }},
+
+           {xtype: 'spacer'},
+
+           {xtype: 'segmentedbutton',
+            allowMultiple: true,
+            items: [
+              {text: 'Show all'}
+            ]}
+
+         ]}
+      ],
+
+      listeners: {
+        beforerender: function(panel) {
+          get_tasks_store().load();
+        }
+      },
+
+      items: [
+
+        {xtyp: 'list',
+         layout: 'fit',
+         // grouped: true,
+         disableSelection: true,
+
+         store: get_tasks_store(),
+         item: 'xxx',
+
+         // getGroupString : function(record) {
+         //   var start = new Date(record.get('starttime'));
+
+         //   var today = new Date();
+         //   today.setHours(0);
+         //   today.setMinutes(0);
+         //   today.setSeconds(0);
+
+         //   var yesterday = new Date();
+         //   yesterday.setHours(0);
+         //   yesterday.setMinutes(0);
+         //   yesterday.setSeconds(0);
+         //   // set date to the day where "day" is 0 (=sunday)
+         //   yesterday.setTime(yesterday.getTime() -
+         //                (yesterday.getDay() * 60 * 60 * 24 * 1000));
+
+         //   if(start > today) {
+         //     return 'Today';
+         //   }
+
+         //   else if(start > yesterday) {
+         //     return 'Yesterday';
+         //   }
+
+         //   else {
+         //     return start.toLocaleString();
+         //   }
+         // }
+
+        }
+
+      ]
+    });
+
+    var clock_panel = new Ext.Panel({
 
       dockedItems: [
         {
@@ -203,13 +287,26 @@ Ext.setup({
           title: 'Workaholic',
 
           items: [
+            {xtype: 'button',
+             iconMask: true,
+             iconCls: 'refresh',
+             ui: 'plain',
+             handler: function() {
+               window.location.reload();
+             }},
+
             {xtype: 'spacer'},
 
             {xtype: 'button',
-             text: 'Reload',
+             // text: 'Details',
+             // ui: 'forward',
+             iconMask: true,
+             ui: 'plain',
+             iconCls: 'list',
              handler: function() {
-               window.location.reload();
+               main_panel.setActiveItem(clock_listing_panel, 'flip');
              }}
+
           ]
         }
       ],
@@ -256,7 +353,7 @@ Ext.setup({
           update_clock_summary();
         }
       }
-    };
+    });
 
 
 
@@ -396,7 +493,6 @@ Ext.setup({
           form.reset();
 
           if(task_details_panel._record !== null) {
-            debug = {form: form, record: task_details_panel._record};
             form.loadRecord(task_details_panel._record);
             Ext.getCmp('task_details_panel-delete_task').show();
 
@@ -436,7 +532,9 @@ Ext.setup({
             {xtype: 'spacer'},
 
             {xtype: 'button',
-             text: 'New',
+             iconMask: true,
+             ui: 'plain',
+             iconCls: 'add',
              handler: function() {
                task_details_panel._record = null;
                main_panel.setActiveItem(task_details_panel, 'flip');
