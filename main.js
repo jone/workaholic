@@ -296,6 +296,7 @@ Ext.setup({
             ]},
 
            {xtype: 'button',
+            id: 'task_details_panel-delete_task',
             ui: 'decline',
             text: 'Delete Task',
 
@@ -341,14 +342,19 @@ Ext.setup({
           form.record = null;
           /* reset fields */
           form.getFieldsAsArray().forEach(function(field) {
-            field.setValue('');
+            field.setValue();
           });
           form.reset();
 
           if(task_details_panel._record !== null) {
             debug = {form: form, record: task_details_panel._record};
             form.loadRecord(task_details_panel._record);
+            Ext.getCmp('task_details_panel-delete_task').show();
+
+          } else {
+            Ext.getCmp('task_details_panel-delete_task').hide();
           }
+
         }
       }
     });
