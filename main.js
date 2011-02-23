@@ -100,16 +100,6 @@ Ext.setup({
 
   onReady: function() {
 
-    var get_clocktime_store = function() {
-      /* returns a SINGLETON clocktime store */
-      if(typeof get_clocktime_store._store == 'undefined') {
-        get_clocktime_store._store = new Ext.data.Store(
-          {model: 'Clocktime', sorters: 'starttime'});
-        get_clocktime_store._store.load();
-      }
-      return get_clocktime_store._store;
-    };
-
     var get_tasks_store = function() {
       /* returns a SINGLETON tasks store */
       if(typeof get_tasks_store._store == 'undefined') {
@@ -206,6 +196,7 @@ Ext.setup({
       dockedItems: [
         {xtype: 'toolbar',
          dock: 'top',
+         layout: 'fit',
 
          items: [
 
@@ -221,6 +212,16 @@ Ext.setup({
 
            {xtype: 'segmentedbutton',
             allowMultiple: true,
+            scope: this,
+
+            listeners: {
+              toggle: function(container, button, pressed) {
+                var store = Ext.getCmp('clock_listing_panel-list').getStore();
+                store._show_all = pressed;
+                store.load();
+              }
+            },
+
             items: [
               {text: 'Show all'}
             ]}
@@ -229,49 +230,113 @@ Ext.setup({
       ],
 
       listeners: {
-        beforerender: function(panel) {
-          get_tasks_store().load();
+        beforeactivate: function(panel) {
+          var store = Ext.getCmp('clock_listing_panel-list').getStore();
+
+          /* create a grouped store - if not created already */
+          if(typeof store === 'undefined') {
+            store = new Ext.data.Store({
+              model: 'Clocktime',
+              sorters: [
+                {property: 'clockin',
+                 direction: 'DESC'}
+              ],
+
+              getGroupString: function(record) {
+                var start = new Date(record.get('clockin'));
+
+                var today = new Date();
+                today.setHours(0);
+                today.setMinutes(0);
+                today.setSeconds(0);
+
+                var yesterday = new Date();
+                yesterday.setHours(0);
+                yesterday.setMinutes(0);
+                yesterday.setSeconds(0);
+                // set date to the day where "day" is 0 (=sunday)
+                yesterday.setTime(yesterday.getTime() -
+                                  (yesterday.getDay() * 60 * 60 * 24 * 1000));
+
+                if(start > today) {
+                  return 'Today - ' + today.format('D, d. M');
+                }
+
+                else if(start > yesterday) {
+                  return 'Yesterday - ' + yesterday.format('D, d. M');
+                }
+
+                else {
+                  return start.format('D, d. M');
+                }
+              },
+
+              filters: [
+                function(record) {
+                  if(record.get('clockout') === 0) {
+                    return false;
+                  }
+
+                  var show_all = false;
+
+                  var store = Ext.getCmp('clock_listing_panel-list').getStore();
+                  if(typeof store != 'undefined') {
+                    show_all = store._show_all;
+                  }
+
+                  if(show_all) {
+                    return true;
+
+                  } else {
+                    var week_start = new Date();
+                    week_start.setHours(0);
+                    week_start.setMinutes(0);
+                    week_start.setSeconds(0);
+                    // set date to the day where "day" is 0 (=sunday)
+                    week_start.setTime(week_start.getTime() - (week_start.getDay() *
+                                                               60 * 60 * 24 * 1000));
+
+                    return new Date(record.get('clockin')) > week_start;
+                  }
+                }
+              ]
+            });
+
+            /* bind the store - need to load it first */
+            store.load();
+            Ext.getCmp('clock_listing_panel-list').bindStore(store);
+          }
+
+          else {
+            /* refresh the store */
+            store.load();
+          }
         }
       },
 
       items: [
 
-        {xtyp: 'list',
+        {xtype: 'list',
+         id: 'clock_listing_panel-list',
          layout: 'fit',
-         // grouped: true,
+         grouped: true,
          disableSelection: true,
 
-         store: get_tasks_store(),
-         item: 'xxx',
+         store: null,
+         // itemTpl: '{id} xxx {clockin}'
+         itemTpl: new Ext.XTemplate(
+           '{[this.render(values)]}',
+           {compiled: true,
 
-         // getGroupString : function(record) {
-         //   var start = new Date(record.get('starttime'));
-
-         //   var today = new Date();
-         //   today.setHours(0);
-         //   today.setMinutes(0);
-         //   today.setSeconds(0);
-
-         //   var yesterday = new Date();
-         //   yesterday.setHours(0);
-         //   yesterday.setMinutes(0);
-         //   yesterday.setSeconds(0);
-         //   // set date to the day where "day" is 0 (=sunday)
-         //   yesterday.setTime(yesterday.getTime() -
-         //                (yesterday.getDay() * 60 * 60 * 24 * 1000));
-
-         //   if(start > today) {
-         //     return 'Today';
-         //   }
-
-         //   else if(start > yesterday) {
-         //     return 'Yesterday';
-         //   }
-
-         //   else {
-         //     return start.toLocaleString();
-         //   }
-         // }
+            render: function(values) {
+              var start = new Date(values.clockin).format('H:i');
+              var end = new Date(values.clockout).format('H:i');
+              var hours = Math.round((values.clockout - values.clockin) /
+                                     1000 / 60 / 60 * 100) / 100;
+              return '<b>' + hours + 'h</b> (' + start + ' - ' + end + 'h)';
+            }
+           }
+         )
 
         }
 
