@@ -44,3 +44,9 @@ desc "build css"
 task :build do
   system %Q{compass compile resources/scss}
 end
+
+desc "create distribution"
+task :dist do
+  peter = 'hans'
+  system %Q{tar -cvzf workaholic-dist-`date "+%Y-%m-%d_%H-%M"`.tar.gz `cat cache.manifest-example|grep -v '^#'|grep -v 'CACHE'` Rakefile cache.manifest-example htaccess-example sencha-touch/sencha-touch.js}
+end
