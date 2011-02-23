@@ -48,5 +48,14 @@ end
 desc "create distribution"
 task :dist do
   peter = 'hans'
-  system %Q{tar -cvzf workaholic-dist-`date "+%Y-%m-%d_%H-%M"`.tar.gz `cat cache.manifest-example|grep -v '^#'|grep -v 'CACHE'` Rakefile cache.manifest-example htaccess-example sencha-touch/sencha-touch.js}
+  system %Q{
+mkdir dist
+cp -RH `cat cache.manifest-example|grep -v '^#'|grep -v 'CACHE'|cut -d '/' -f 1` dist
+cp cache.manifest-example dist/cache.manifest
+cp htaccess-example dist/.htaccess
+cd dist
+tar -czf ../workaholic-dist-`date "+%Y-%m-%d_%H-%M"`.tar.gz `cat ../cache.manifest-example|grep -v '^#'|grep -v 'CACHE'` .htaccess cache.manifest
+cd ..
+rm -rf dist
+}
 end
