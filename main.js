@@ -192,11 +192,98 @@ Ext.setup({
     };
     setInterval(update_clock_summary, 30000);
 
+    var clocktime_details_panel = new Ext.Panel({
+
+      listeners: {
+        beforeactivate: function(button) {
+          var form = Ext.getCmp('clocktime_details_panel-form');
+          form.record = null;
+          /* reset fields */
+          form.getFieldsAsArray().forEach(function(field) {
+            field.setValue();
+          });
+          form.reset();
+
+          if(clocktime_details_panel._record !== null) {
+            form.loadRecord(clocktime_details_panel._record);
+
+            /* date picker fixes */
+            form.getFields().clockin.setValue(
+              new Date(clocktime_details_panel._record.get('clockin')));
+            form.getFields().clockout.setValue(
+              new Date(clocktime_details_panel._record.get('clockout')));
+
+            Ext.getCmp('clocktime_details_panel-delete_item').show();
+
+          } else {
+            Ext.getCmp('clocktime_details_panel-delete_item').hide();
+          }
+        }
+      },
+
+      dockedItems: [{xtype: 'toolbar',
+                     dock: 'top',
+
+                     items: [
+                       {xtype: 'button',
+                        ui: 'back',
+                        text: 'Cancel',
+                        handler: function(button) {
+                          main_panel.setActiveItem(clock_listing_panel, 'flip');
+                        }},
+
+                       {xtype: 'spacer'},
+
+                       {xtype: 'button',
+                        text: 'Save',
+                        handler: function(button) {
+                          alert('Not implemented yet - sorry');
+                        }}
+
+                     ]
+                    }],
+
+      items: [{xtype: 'form',
+               id: 'clocktime_details_panel-form',
+               scroll: 'vertical',
+
+               items: [
+                 {xtype: 'fieldset',
+                  defaults: {
+                    labelWidth: '35%'
+                  },
+
+                  items: [
+
+                    {xtype: 'datepickerfield',
+                     name: 'clockin',
+                     label: 'Start'},
+
+                    {xtype: 'datepickerfield',
+                     name: 'clockout',
+                     label: 'End'}
+
+                  ]
+                 },
+
+                 {xtype: 'button',
+                  id: 'clocktime_details_panel-delete_item',
+                  ui: 'decline',
+                  text: 'Delete',
+
+                  handler: function(button) {
+                    alert('Not implemented yet - sorry');
+                  }}
+
+               ]
+              }]
+
+    });
+
     var clock_listing_panel = new Ext.Panel({
       dockedItems: [
         {xtype: 'toolbar',
          dock: 'top',
-         layout: 'fit',
 
          items: [
 
@@ -224,9 +311,24 @@ Ext.setup({
 
             items: [
               {text: 'Show all'}
-            ]}
+            ]},
+
+
+           {xtype: 'spacer'},
+
+           {xtype: 'button',
+            iconMask: true,
+            ui: 'plain',
+            iconCls: 'add',
+
+            handler: function(button) {
+              clocktime_details_panel._record = null;
+              main_panel.setActiveItem(clocktime_details_panel, 'flip');
+            }
+           }
 
          ]}
+
       ],
 
       listeners: {
@@ -323,7 +425,6 @@ Ext.setup({
          disableSelection: true,
 
          store: null,
-         // itemTpl: '{id} xxx {clockin}'
          itemTpl: new Ext.XTemplate(
            '{[this.render(values)]}',
            {compiled: true,
@@ -336,7 +437,16 @@ Ext.setup({
               return '<b>' + hours + 'h</b> (' + start + ' - ' + end + 'h)';
             }
            }
-         )
+         ),
+
+         listeners: {
+
+           itemtap: function(list, index, node, event) {
+             clocktime_details_panel._record = list.getRecord(node);
+             main_panel.setActiveItem(clocktime_details_panel, 'flip');
+           }
+
+         }
 
         }
 
