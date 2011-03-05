@@ -136,7 +136,6 @@ Workaholic.DateTimePickerField = Ext.extend(Ext.form.DatePicker, {
 
   getValue: function(format) {
     var value = this.value || null;
-    console.log(['value:', this.value, this.name]);
 
     if(!format) {
       return value;
@@ -430,8 +429,9 @@ Ext.setup({
 
                           } else {
                             /* create mode */
-                            alert('not implemented');
-                            return;
+                            Ext.ModelMgr.create({clockin: values.clockin.getTime(),
+                                                clockout: values.clockout.getTime(),
+                                                closed: true}, 'Clocktime').save();
                           }
 
                           /* reload the tasks store */
@@ -474,7 +474,13 @@ Ext.setup({
                   text: 'Delete',
 
                   handler: function(button) {
-                    alert('Not implemented yet - sorry');
+                    var form = Ext.getCmp('clocktime_details_panel-form');
+                    var store = Ext.getCmp('clock_listing_panel-list').getStore();
+                    store.remove(form.getRecord());
+                    store.sync();
+
+                    /* close dialog */
+                    main_panel.setActiveItem(clock_listing_panel, 'flip');
                   }}
 
                ]
