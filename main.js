@@ -1,5 +1,126 @@
 var tabpanel;
 
+var Workaholic = {};
+
+/* ===== EXTENSIONS ====== */
+
+Workaholic.TimePicker = Ext.extend(Ext.Picker, {
+  dayText: 'Day',
+  hourText: 'Hour',
+  minuteText: 'Minute',
+
+  slotOrder: ['day', 'hour', 'minute'],
+
+  initComponent: function() {
+    var hours = [];
+    var minutes = [];
+
+    for(var i=0; i<60; i++) {
+      if(i<24) {
+        hours.push({text: i, value: i});
+      }
+      minutes.push({text: i, value: i});
+    }
+
+    console.info(hours, minutes);
+
+    this.slots = [
+      {name: 'hour',
+       align: 'center',
+       data: hours,
+       title: this.useTitles ? this.hourText : false,
+       flex: 2},
+
+      {name: 'minute',
+       align: 'center',
+       data: minutes,
+       title: this.useTitles ? this.minuteText : false,
+       flex: 2}
+    ];
+
+    Workaholic.TimePicker.superclass.initComponent.call(this);
+  },
+
+  setValue: function(value, animated) {
+    if (!Ext.isDate(value) && !Ext.isObject(value)) {
+      value = null;
+    }
+
+    if (Ext.isDate(value)) {
+      this.value = {
+        day : value.getDate(),
+        year: value.getFullYear(),
+        month: value.getMonth() + 1,
+        hour: value.getHours(),
+        minute: value.getMinutes()
+      };
+      this.originalDate = value;
+    } else {
+      this.value = value;
+      this.originalDate = null;
+    }
+
+    return Workaholic.TimePicker.superclass.setValue.call(
+      this, this.value, animated);
+  },
+
+  getValue: function() {
+    var value = Workaholic.TimePicker.superclass.getValue.call(this);
+    var date = this.originalDate;
+    if(!date) {
+      date = new Date();
+    }
+    date.setHours(value.hour);
+    date.setMinutes(value.minute);
+    return date;
+  }
+});
+Ext.reg('timepicker', Workaholic.TimePicker);
+
+
+Workaholic.TimePickerField = Ext.extend(Ext.form.DatePicker, {
+
+  getValue: function(format) {
+    var value = this.value || null;
+    if(format && Ext.isNumber(value)) {
+      return new Date(value).format('H:i');
+
+    } else if(format && Ext.isDate(value)) {
+      return value.format('H:i');
+
+    } else {
+      return value;
+    }
+  },
+
+  onPickerChange : function(picker, value) {
+    this.setValue(value.getTime());
+    this.fireEvent('select', this, this.getValue());
+  },
+
+  getDatePicker: function() {
+    if (!this.datePicker) {
+      if (this.picker instanceof Workaholic.TimePicker) {
+        this.datePicker = this.picker;
+      } else {
+        this.datePicker = new Workaholic.TimePicker(
+          Ext.apply(this.picker || {}));
+      }
+
+      this.datePicker.setValue(new Date(this.value) || null);
+
+      this.datePicker.on({
+        scope : this,
+        change: this.onPickerChange,
+        hide  : this.onPickerHide
+      });
+    }
+
+    return this.datePicker;
+  }
+});
+Ext.reg('timepickerfield', Workaholic.TimePickerField);
+
 
 /* ===== DATABASE ====== */
 
@@ -207,12 +328,6 @@ Ext.setup({
           if(clocktime_details_panel._record !== null) {
             form.loadRecord(clocktime_details_panel._record);
 
-            /* date picker fixes */
-            form.getFields().clockin.setValue(
-              new Date(clocktime_details_panel._record.get('clockin')));
-            form.getFields().clockout.setValue(
-              new Date(clocktime_details_panel._record.get('clockout')));
-
             Ext.getCmp('clocktime_details_panel-delete_item').show();
 
           } else {
@@ -236,8 +351,35 @@ Ext.setup({
 
                        {xtype: 'button',
                         text: 'Save',
+
                         handler: function(button) {
-                          alert('Not implemented yet - sorry');
+                          var form = Ext.getCmp('clocktime_details_panel-form');
+                          var values = form.getValues();
+
+                          if(values.clockin > values.clockout) {
+                            alert('Start time must be before end time.');
+                            return;
+                          }
+
+                          if(clocktime_details_panel._record !== null) {
+                            /* edit mode */
+                            var record = form.getRecord();
+                            record.set('clockin', values.clockin.getTime());
+                            record.set('clockout', values.clockout.getTime());
+                            record.save();
+
+                          } else {
+                            /* create mode */
+                            alert('not implemented');
+                            return;
+                          }
+
+                          /* reload the tasks store */
+                          Ext.getCmp('clock_listing_panel-list').getStore().load();
+
+                          /* close dialog */
+                          main_panel.setActiveItem(clock_listing_panel, 'flip');
+
                         }}
 
                      ]
@@ -255,11 +397,11 @@ Ext.setup({
 
                   items: [
 
-                    {xtype: 'datepickerfield',
+                    {xtype: 'timepickerfield',
                      name: 'clockin',
                      label: 'Start'},
 
-                    {xtype: 'datepickerfield',
+                    {xtype: 'timepickerfield',
                      name: 'clockout',
                      label: 'End'}
 
