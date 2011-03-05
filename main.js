@@ -2,43 +2,92 @@ var tabpanel;
 
 var Workaholic = {};
 
-/* ===== EXTENSIONS ====== */
+/* ===== JAVASCRIPT EXTENSIONS */
 
-Workaholic.TimePicker = Ext.extend(Ext.Picker, {
-  dayText: 'Day',
-  hourText: 'Hour',
-  minuteText: 'Minute',
 
-  slotOrder: ['day', 'hour', 'minute'],
+String.prototype.ljust = function( width, padding ) {
+  padding = padding || " ";
+  padding = padding.substr( 0, 1 );
+  if( this.length < width )
+    return this + padding.repeat( width - this.length );
+  else
+    return this;
+};
+
+
+/* ===== EXT EXTENSIONS ====== */
+
+Workaholic.DateTimePicker = Ext.extend(Ext.Picker, {
+
+  /* 30 days ago */
+  startDate: new Date() - (1000 * 60 * 60 * 24 * 30),
+
+  /* 30 days from now */
+  endDate: (new Date() * 1) + (1000 * 60 * 60 * 24 * 30),
+
+  slotOrder: ['date', 'hours', 'minutes'],
+
 
   initComponent: function() {
+
+    var dates = [];
     var hours = [];
     var minutes = [];
+    var i;
+    this.slots = [];
 
-    for(var i=0; i<60; i++) {
-      if(i<24) {
-        hours.push({text: i, value: i});
-      }
-      minutes.push({text: i, value: i});
+    var today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
+
+    var amount_of_days = Math.round(
+      (this.endDate - this.startDate) / (1000 * 60 * 60 * 24));
+
+    for(i=0; i<amount_of_days; i++) {
+      var date = new Date(this.startDate + (1000 * 60 * 60 * 24 * i));
+      date.setHours(0);
+      date.setMinutes(0);
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+
+      var is_today = date * 1 === today * 1;
+
+      dates.push({
+        text: is_today ? 'Today' : date.format('D. d. M'),
+        value: date * 1
+      });
     }
 
-    console.info(hours, minutes);
+    this.slots.push({name: 'date',
+                     align: 'right',
+                     data: dates,
+                     title: false,
+                     flex: 5});
 
-    this.slots = [
-      {name: 'hour',
-       align: 'center',
-       data: hours,
-       title: this.useTitles ? this.hourText : false,
-       flex: 2},
+    for(i=0; i<60; i++) {
+      if(i<24) {
+        hours.push({text: String(i),
+                    value: i});
+      }
+      minutes.push({text: i < 10 ? '0'.concat(i) : String(i),
+                    value: i});
+    }
 
-      {name: 'minute',
-       align: 'center',
-       data: minutes,
-       title: this.useTitles ? this.minuteText : false,
-       flex: 2}
-    ];
+    this.slots.push({name: 'hours',
+                     align: 'left',
+                     data: hours,
+                     title: false,
+                     flex: 2});
 
-    Workaholic.TimePicker.superclass.initComponent.call(this);
+    this.slots.push({name: 'minutes',
+                     align: 'center',
+                     data: minutes,
+                     title: false,
+                     flex: 2});
+
+    return Workaholic.DateTimePicker.superclass.initComponent.call(this);
   },
 
   setValue: function(value, animated) {
@@ -47,67 +96,70 @@ Workaholic.TimePicker = Ext.extend(Ext.Picker, {
     }
 
     if (Ext.isDate(value)) {
-      this.value = {
-        day : value.getDate(),
-        year: value.getFullYear(),
-        month: value.getMonth() + 1,
-        hour: value.getHours(),
-        minute: value.getMinutes()
-      };
-      this.originalDate = value;
+      var zeroDate = new Date(value);
+      zeroDate.setHours(0);
+      zeroDate.setMinutes(0);
+      zeroDate.setSeconds(0);
+      zeroDate.setMilliseconds(0);
+
+      this.value = {date: zeroDate * 1,
+                    hours: value.getHours(),
+                    minutes: value.getMinutes()};
+
     } else {
       this.value = value;
-      this.originalDate = null;
     }
 
-    return Workaholic.TimePicker.superclass.setValue.call(
+    return Workaholic.DateTimePicker.superclass.setValue.call(
       this, this.value, animated);
   },
 
   getValue: function() {
-    var value = Workaholic.TimePicker.superclass.getValue.call(this);
-    var date = this.originalDate;
-    if(!date) {
-      date = new Date();
-    }
-    date.setHours(value.hour);
-    date.setMinutes(value.minute);
+    var value = Workaholic.DateTimePicker.superclass.getValue.call(this);
+    var date = new Date(value['date']);
+    date.setHours(value['hours']);
+    date.setMinutes(value['minutes']);
     return date;
   }
 });
-Ext.reg('timepicker', Workaholic.TimePicker);
+Ext.reg('timepicker', Workaholic.DateTimePicker);
 
 
-Workaholic.TimePickerField = Ext.extend(Ext.form.DatePicker, {
+Workaholic.DateTimePickerField = Ext.extend(Ext.form.DatePicker, {
 
   getValue: function(format) {
     var value = this.value || null;
-    if(format && Ext.isNumber(value)) {
-      return new Date(value).format('H:i');
 
-    } else if(format && Ext.isDate(value)) {
-      return value.format('H:i');
+    if(!format) {
+      return value;
+    }
 
+    if(Ext.isNumber(value)) {
+      value = new Date(value);
+    }
+
+    if(Ext.isDate(value)) {
+      return value.format('D. d. M H:i');
     } else {
       return value;
     }
   },
 
-  onPickerChange : function(picker, value) {
-    this.setValue(value.getTime());
+  onPickerChange: function(picker, value) {
+    this.setValue(value);
     this.fireEvent('select', this, this.getValue());
   },
 
   getDatePicker: function() {
     if (!this.datePicker) {
-      if (this.picker instanceof Workaholic.TimePicker) {
+      if (this.picker instanceof Workaholic.DateTimePicker) {
         this.datePicker = this.picker;
       } else {
-        this.datePicker = new Workaholic.TimePicker(
+        this.datePicker = new Workaholic.DateTimePicker(
           Ext.apply(this.picker || {}));
       }
 
-      this.datePicker.setValue(new Date(this.value) || null);
+      this.datePicker.setValue(this.value ? new Date(this.value) : new Date());
 
       this.datePicker.on({
         scope : this,
@@ -119,7 +171,7 @@ Workaholic.TimePickerField = Ext.extend(Ext.form.DatePicker, {
     return this.datePicker;
   }
 });
-Ext.reg('timepickerfield', Workaholic.TimePickerField);
+Ext.reg('timepickerfield', Workaholic.DateTimePickerField);
 
 
 /* ===== DATABASE ====== */
