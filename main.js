@@ -127,8 +127,16 @@ Ext.reg('timepicker', Workaholic.DateTimePicker);
 
 Workaholic.DateTimePickerField = Ext.extend(Ext.form.DatePicker, {
 
+  setValue: function(value) {
+    if(value && Ext.isNumber(value)) {
+      value = new Date(value);
+    }
+    return Workaholic.DateTimePickerField.superclass.setValue.call(this, value);
+  },
+
   getValue: function(format) {
     var value = this.value || null;
+    console.log(['value:', this.value, this.name]);
 
     if(!format) {
       return value;
@@ -159,14 +167,14 @@ Workaholic.DateTimePickerField = Ext.extend(Ext.form.DatePicker, {
           Ext.apply(this.picker || {}));
       }
 
-      this.datePicker.setValue(this.value ? new Date(this.value) : new Date());
-
       this.datePicker.on({
         scope : this,
         change: this.onPickerChange,
         hide  : this.onPickerHide
       });
     }
+
+    this.datePicker.setValue(this.value ? new Date(this.value) : new Date());
 
     return this.datePicker;
   }
