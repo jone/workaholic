@@ -568,11 +568,11 @@ Ext.setup({
                 yesterday.setTime(yesterday.getTime() -
                                   (yesterday.getDay() * 60 * 60 * 24 * 1000));
 
-                if(start > today) {
+                if(start.format('dmY') == today.format('dmY')) {
                   return 'Today - ' + today.format('D, d. M');
                 }
 
-                else if(start > yesterday) {
+                else if(start.format('dmY') == yesterday.format('dmY')) {
                   return 'Yesterday - ' + yesterday.format('D, d. M');
                 }
 
