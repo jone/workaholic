@@ -1268,7 +1268,7 @@ Ext.setup({
                   var date = new Date(today.getTime() -
                                       (d * 24 * 60 * 60 * 1000));
 
-                  if(date.getDay() === 0 || date.getDay() === 1) {
+                  if(date.getDay() === 0 || date.getDay() === 6) {
                     /* its weekend - chill it.. */
                     continue;
                   }
@@ -1291,6 +1291,9 @@ Ext.setup({
                     closed: true
                   }, 'Clocktime').save();
                 }
+
+                developers_panel.hide();
+                alert('Please restart the app.');
 
               }
             }}
