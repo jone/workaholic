@@ -430,8 +430,8 @@ Ext.setup({
                           } else {
                             /* create mode */
                             Ext.ModelMgr.create({clockin: values.clockin.getTime(),
-                                                clockout: values.clockout.getTime(),
-                                                closed: true}, 'Clocktime').save();
+                                                 clockout: values.clockout.getTime(),
+                                                 closed: true}, 'Clocktime').save();
                           }
 
                           /* reload the tasks store */
@@ -1184,6 +1184,14 @@ Ext.setup({
                  });
                }
                this.actions.show();
+             }},
+
+            {xtype: 'panel'},
+
+            {xtype: 'button',
+             text: 'Developers Menu',
+             handler: function(button) {
+               main_panel.setActiveItem(developers_panel, 'flip');
              }}
 
           ]
@@ -1197,6 +1205,98 @@ Ext.setup({
         }
       }
     };
+
+
+
+    /* ============== DEVELOPERS PANEL ============ */
+
+    var developers_panel = new Ext.Panel({
+
+      dockedItems: [
+        {xtype: 'toolbar',
+         dock: 'top',
+         title: 'Developers',
+
+         items:[
+           {xtype: 'button',
+            ui: 'back',
+            text: 'Back',
+
+            handler: function() {
+              main_panel.setActiveItem(tabpanel, 'flip');
+            }}
+         ]
+        }
+      ],
+
+      items: [
+
+        {xtype: 'form',
+
+         items: [
+
+           {xtype: 'button',
+            ui: 'decline',
+            text: 'Example data',
+
+            handler: function(button) {
+              if(confirm("Are you sure you wan't to delete all your " +
+                         "data and load example data?")) {
+
+                /* generate example data randomly for the last 30 days
+                 */
+
+                var rand = Math.random;
+                var add_hours_to_date = function(date, hours) {
+                  /* add floated hours to a date object, returns
+                   a new date object. */
+                  return new Date(date.getTime() +
+                                  (hours * 60 * 60 * 1000));
+                }
+
+                /* purge current local storage */
+                window.localStorage.clear();
+
+
+                /* add stamps relative to the current date */
+                var today = new Date();
+                today.setHours(0);
+                today.setMinutes(0);
+                today.setSeconds(0);
+
+                for(var d=0; d<30; d++) {
+                  var date = new Date(today.getTime() -
+                                      (d * 24 * 60 * 60 * 1000));
+
+                  if(date.getDay() === 0 || date.getDay() === 1) {
+                    /* its weekend - chill it.. */
+                    continue;
+                  }
+
+                  /* calculate start / end hours */
+                  var start_morning = 7 + (rand() * 3);
+                  var end_morning = 11 + (rand() * 3);
+                  var start_afternoon = end_morning + (rand() * 1.5);
+                  var end_afternoon = 16 + (rand() * 4);
+
+                  Ext.ModelMgr.create({
+                    clockin: add_hours_to_date(date, start_morning).getTime(),
+                    clockout: add_hours_to_date(date, end_morning).getTime(),
+                    closed: true
+                  }, 'Clocktime').save();
+
+                  Ext.ModelMgr.create({
+                    clockin: add_hours_to_date(date, start_afternoon).getTime(),
+                    clockout: add_hours_to_date(date, end_afternoon).getTime(),
+                    closed: true
+                  }, 'Clocktime').save();
+                }
+
+              }
+            }}
+         ]}
+      ]
+    });
 
 
 
