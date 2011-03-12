@@ -629,7 +629,7 @@ Ext.setup({
         {xtype: 'list',
          id: 'clock_listing_panel-list',
          grouped: true,
-         height: 500,
+         height: 413,
          disableSelection: true,
 
          store: null,
@@ -1109,6 +1109,8 @@ Ext.setup({
     };
 
     var settings_panel = {
+      scroll: 'vertical',
+      height: 404,
 
       dockedItems: [
         {
@@ -1138,7 +1140,6 @@ Ext.setup({
           title: 'Basic',
           xtype: 'form',
           id: 'basicform',
-          scroll: 'vertical',
           items: [
 
             {
@@ -1325,10 +1326,6 @@ Ext.setup({
       ui: 'light',
       cardSwitchAnimation: {
         type: 'slide'
-      },
-
-      defaults: {
-        scroll: 'vertical'
       },
 
       items: [
