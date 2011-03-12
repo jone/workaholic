@@ -1160,39 +1160,20 @@ Ext.setup({
               ]
             },
 
-            {xtype: 'button',
-             ui: 'decline',
-             text: 'Reset Application',
-             handler: function(button) {
-               if (!this.actions) {
-                 this.actions = new Ext.ActionSheet({
-                   items: [{
-                     text: 'Delete everything!',
-                     ui: 'decline',
-                     scope: this,
-                     handler: function(button) {
-                       window.localStorage.clear();
-                       this.actions.hide();
-                     }
-                   },{
-                     text: 'Cancel',
-                     scope: this,
-                     handler: function(button) {
-                       this.actions.hide();
-                     }
-                   }]
-                 });
-               }
-               this.actions.show();
-             }},
+            {
+              xtype: 'fieldset',
+              title: 'Developers',
 
-            {xtype: 'panel'},
+              items: [
 
-            {xtype: 'button',
-             text: 'Developers Menu',
-             handler: function(button) {
-               main_panel.setActiveItem(developers_panel, 'flip');
-             }}
+                {xtype: 'button',
+                 text: 'Developers Menu',
+                 handler: function(button) {
+                   main_panel.setActiveItem(developers_panel, 'flip');
+                 }}
+
+              ]
+            }
 
           ]
         }
@@ -1237,6 +1218,34 @@ Ext.setup({
 
            {xtype: 'button',
             ui: 'decline',
+            text: 'Reset Application',
+            handler: function(button) {
+              if (!this.actions) {
+                this.actions = new Ext.ActionSheet({
+                  items: [{
+                    text: 'Delete everything!',
+                    ui: 'decline',
+                    scope: this,
+                    handler: function(button) {
+                      window.localStorage.clear();
+                      this.actions.hide();
+                    }
+                  },{
+                    text: 'Cancel',
+                    scope: this,
+                    handler: function(button) {
+                      this.actions.hide();
+                    }
+                  }]
+                });
+              }
+              this.actions.show();
+            }},
+
+           {xtype: 'panel'},
+
+           {xtype: 'button',
+            ui: 'decline',
             text: 'Example data',
 
             handler: function(button) {
@@ -1249,7 +1258,7 @@ Ext.setup({
                 var rand = Math.random;
                 var add_hours_to_date = function(date, hours) {
                   /* add floated hours to a date object, returns
-                   a new date object. */
+                     a new date object. */
                   return new Date(date.getTime() +
                                   (hours * 60 * 60 * 1000));
                 }
