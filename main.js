@@ -628,8 +628,8 @@ Ext.setup({
 
         {xtype: 'list',
          id: 'clock_listing_panel-list',
-         layout: 'fit',
          grouped: true,
+         height: 500,
          disableSelection: true,
 
          store: null,
