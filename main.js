@@ -1123,7 +1123,7 @@ Ext.setup({
             {xtype: 'button',
              text: 'Save',
              handler: function() {
-               var form = Ext.getCmp('settings-basic-form')
+               var form = Ext.getCmp('settings-basic-form');
                var values = form.getValues();
 
                for(var name in values) {
@@ -1271,7 +1271,7 @@ Ext.setup({
                      a new date object. */
                   return new Date(date.getTime() +
                                   (hours * 60 * 60 * 1000));
-                }
+                };
 
                 /* purge current local storage */
                 window.localStorage.clear();
