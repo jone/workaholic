@@ -1123,9 +1123,12 @@ Ext.setup({
             {xtype: 'button',
              text: 'Save',
              handler: function() {
-               set_setting(
-                 'working-time',
-                 Ext.getCmp('settings-field-working-time').getValue());
+               var form = Ext.getCmp('settings-basic-form')
+               var values = form.getValues();
+
+               for(var name in values) {
+                 set_setting(name, values[name]);
+               }
 
                tabpanel.setActiveItem(tabpanel.items.get(0),
                                       {type: 'slide', direction: 'right'});
@@ -1139,7 +1142,7 @@ Ext.setup({
         {
           title: 'Basic',
           xtype: 'form',
-          id: 'basicform',
+          id: 'settings-basic-form',
           items: [
 
             {
@@ -1154,9 +1157,8 @@ Ext.setup({
               items: [
                 {
                   xtype: 'numberfield',
-                  name: 'working_time',
-                  label: 'Working Time',
-                  id: 'settings-field-working-time'
+                  name: 'working-time',
+                  label: 'Working Time'
                 }
               ]
             },
@@ -1183,7 +1185,14 @@ Ext.setup({
 
       listeners: {
         beforerender: function(panel) {
-          Ext.getCmp('settings-field-working-time').value = get_working_time();
+          var form = Ext.getCmp('settings-basic-form');
+          var values = {};
+
+          for(var name in form.getValues()) {
+            values[name] = get_setting(name);
+          }
+
+          form.setValues(values);
         }
       }
     };
