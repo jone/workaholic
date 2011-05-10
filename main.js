@@ -1354,7 +1354,7 @@ Ext.setup({
         },
 
         {
-          title: 'Staistics',
+          title: 'Statistics',
           iconCls: 'chart2',
           cls: 'card_stats',
           items: [stats_panel]
